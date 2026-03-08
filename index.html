@@ -56,6 +56,7 @@
       padding: clamp(9px,2vw,13px) clamp(18px,4vw,30px);
       font-size: clamp(.9rem,2vw,1.1rem); border-radius: 12px; border: none;
       cursor: pointer; font-weight: bold; transition: transform .15s;
+      touch-action: manipulation;
     }
     .btn:hover  { transform: translateY(-2px); }
     .btn:active { transform: translateY(0); }
@@ -69,6 +70,7 @@
       display: block;
       background: url('game frame.png') center center / cover no-repeat;
       background-color: #2a2a3a;
+      touch-action: none;
     }
 
     /* ── HUD (siren + label only) ── */
@@ -144,6 +146,9 @@
       transform-origin: bottom center;
       transition: z-index 0s;
       -webkit-tap-highlight-color: transparent;
+      touch-action: none;          /* critical: let JS own all touch gestures */
+      user-select: none;
+      -webkit-user-select: none;
     }
     .char.in-mamad { cursor: default; pointer-events: none; }
 
@@ -802,8 +807,8 @@ function spawnItems() {
       el.innerHTML = '<span class="item-emoji">' + d.emoji + '</span>';
     }
 
-    el.addEventListener('click',    () => onItemClick(d.id));
-    el.addEventListener('touchend', e => { e.preventDefault(); onItemClick(d.id); });
+    el.style.touchAction = 'manipulation';
+    el.addEventListener('pointerdown', e => { e.preventDefault(); onItemClick(d.id); });
     game.appendChild(el);
   });
 }

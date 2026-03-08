@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(sort -k6,7)"
+      "Bash(sort -k6,7)",
+      "Bash(git config --global credential.helper)",
+      "Bash(security find-internet-password -s github.com)",
+      "Bash(ssh-keygen -t ed25519 -C \"aiabechor@gmail.com\" -f ~/.ssh/id_ed25519 -N \"\")",
+      "Read(//Users/aiabk/.ssh/**)"
     ]
   }
 }
