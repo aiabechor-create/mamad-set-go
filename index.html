@@ -142,14 +142,16 @@
     .char {
       position: absolute;
       display: flex; flex-direction: column; align-items: center;
-      cursor: grab; z-index: 15;
+      cursor: pointer; z-index: 15;   /* pointer = iOS Safari recognises as tappable */
       transform-origin: bottom center;
       transition: z-index 0s;
       -webkit-tap-highlight-color: transparent;
-      touch-action: none;          /* critical: let JS own all touch gestures */
+      touch-action: none;
       user-select: none;
       -webkit-user-select: none;
     }
+    .char:not(.in-mamad) { cursor: grab; }
+    @media (hover: none) { .char:not(.in-mamad) { cursor: pointer; } }
     .char.in-mamad { cursor: default; pointer-events: none; }
 
     /* The image — animations run here */
@@ -680,29 +682,38 @@ function spawnChars() {
 function attachDrag(c, div) {
   let ox = 0, oy = 0;
 
+  // iOS Safari: element must have onclick to be treated as interactive
+  div.onclick = e => e.preventDefault();
+
   div.addEventListener('pointerdown', e => {
     if (!gameRunning || c.state === 'in-mamad') return;
     e.preventDefault();
-    div.setPointerCapture(e.pointerId);
-    ox = e.clientX - c.x;
-    oy = e.clientY - c.y;
-    c.state  = 'dragged';
+    e.stopPropagation();
+    try { div.setPointerCapture(e.pointerId); } catch(_) {}
+    // Use getBoundingClientRect so the finger grabs exactly where tapped
+    const r = div.getBoundingClientRect();
+    ox = e.clientX - r.left;
+    oy = e.clientY - r.top;
+    c.state = 'dragged';
     c.tx = null;
     div.classList.add('dragging');
-  });
+  }, { passive: false });
 
   div.addEventListener('pointermove', e => {
     if (c.state !== 'dragged') return;
     e.preventDefault();
-    c.x = e.clientX - ox;
-    c.y = e.clientY - oy;
+    const r = div.getBoundingClientRect();
+    // Move the CSS position so the visual element follows the finger
+    c.x += e.clientX - (r.left + ox);
+    c.y += e.clientY - (r.top  + oy);
     div.style.left = c.x + 'px';
     div.style.top  = c.y + 'px';
-  });
+  }, { passive: false });
 
   div.addEventListener('pointerup', e => {
     if (c.state !== 'dragged') return;
     e.preventDefault();
+    e.stopPropagation();
     div.classList.remove('dragging');
 
     if (c.x + 40 >= mamadX) {
