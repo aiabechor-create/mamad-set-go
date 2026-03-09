@@ -13,6 +13,18 @@
       overflow: hidden; user-select: none; -webkit-user-select: none;
     }
 
+    /* ── FULLSCREEN EXIT BUTTON ── */
+    #fs-exit-btn {
+      display: none;
+      position: fixed; top: 10px; left: 10px; z-index: 9999;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(0,0,0,.6); border: 1px solid rgba(255,255,255,.3);
+      color: #fff; font-size: 18px; cursor: pointer;
+      align-items: center; justify-content: center;
+      line-height: 1;
+    }
+    #fs-exit-btn.visible { display: flex; }
+
     /* ── SCREENS ── */
     .screen { display: none; position: absolute; inset: 0; }
 
@@ -141,6 +153,14 @@
       }
       #timer-el { font-size: clamp(1.8rem,6vw,2.8rem); }
       #timer-clock { font-size: clamp(1.8rem,6vw,2.8rem); }
+      /* characters 20% smaller on mobile */
+      .char-img { height: clamp(122px, 20.2vh, 182px); }
+      .is-cat .char-img { height: clamp(85px, 13.2vh, 125px); }
+      .char-emoji-display {
+        width: clamp(122px, 20.2vh, 182px);
+        height: clamp(122px, 20.2vh, 182px);
+        font-size: clamp(58px, 9.6vh, 86px);
+      }
     }
     @media (orientation: portrait) and (max-width: 600px) {
       #portrait-warning { display: flex !important; }
@@ -392,6 +412,8 @@
 </div>
 
 <!-- ═══ PORTRAIT WARNING ═══ -->
+<button id="fs-exit-btn" onclick="exitFS()" title="יציאה ממסך מלא">✕</button>
+
 <div id="portrait-warning">
   <p>סובב את המכשיר לרוחב כדי לשחק!</p>
   <span>📱</span>
@@ -600,8 +622,26 @@ function showScreen(id) {
 // ═══════════════════════════════════════════════
 // START
 // ═══════════════════════════════════════════════
+// ── FULLSCREEN ──────────────────────────────────
+function enterFS() {
+  const el = document.documentElement;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+  if (req) req.call(el).catch(() => {});
+}
+function exitFS() {
+  const ex = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+  if (ex) ex.call(document).catch(() => {});
+}
+document.addEventListener('fullscreenchange', updateFSBtn);
+document.addEventListener('webkitfullscreenchange', updateFSBtn);
+function updateFSBtn() {
+  const inFS = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  document.getElementById('fs-exit-btn').classList.toggle('visible', inFS);
+}
+
 function startGame() {
   playerName = document.getElementById('name-input').value.trim() || 'אנונימי';
+  enterFS();
   stopAll();
   inMamad.clear();
   slotIdx   = 0;
