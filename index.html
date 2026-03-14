@@ -158,13 +158,13 @@
       }
       #timer-el { font-size: clamp(1.8rem,6vw,2.8rem); }
       #timer-clock { font-size: clamp(1.8rem,6vw,2.8rem); }
-      /* characters 30% smaller on mobile */
-      .char-img { height: clamp(106px, 17.7vh, 160px); }
-      .is-cat .char-img { height: clamp(74px, 11.6vh, 109px); }
+      /* characters 40% smaller on mobile */
+      .char-img { height: clamp(91px, 15.2vh, 137px); }
+      .is-cat .char-img { height: clamp(64px, 10vh, 94px); }
       .char-emoji-display {
-        width: clamp(106px, 17.7vh, 160px);
-        height: clamp(106px, 17.7vh, 160px);
-        font-size: clamp(50px, 8.4vh, 76px);
+        width: clamp(91px, 15.2vh, 137px);
+        height: clamp(91px, 15.2vh, 137px);
+        font-size: clamp(43px, 7.2vh, 65px);
       }
     }
     @media (orientation: portrait) and (max-width: 600px) {
@@ -1058,11 +1058,12 @@ function buildMoods(id, outcome) {
     const w = document.createElement('div');
     w.style.cssText = 'display:inline-flex;flex-direction:column;align-items:center;gap:3px;margin:4px 5px;background:rgba(255,255,255,.1);border-radius:10px;padding:6px 6px 4px;';
 
+    const fallbackDiv = '<div style="width:clamp(46px,7vh,64px);height:clamp(46px,7vh,64px);background:' + c.color + ';border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(24px,3.8vh,34px)">' + c.emoji + '</div>';
     let avatarHtml;
     if (IMG[c.id]) {
-      avatarHtml = '<img src="' + IMG[c.id] + '" alt="' + c.name + '" style="height:clamp(46px,7vh,64px);width:auto;display:block">';
+      avatarHtml = '<img src="' + IMG[c.id] + '" alt="' + c.name + '" style="height:clamp(46px,7vh,64px);width:auto;display:block" onerror="this.outerHTML=\'' + fallbackDiv.replace(/'/g, '&#39;') + '\'">';
     } else {
-      avatarHtml = '<div style="width:clamp(46px,7vh,64px);height:clamp(46px,7vh,64px);background:' + c.color + ';border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(24px,3.8vh,34px)">' + c.emoji + '</div>';
+      avatarHtml = fallbackDiv;
     }
 
     w.innerHTML = avatarHtml +
