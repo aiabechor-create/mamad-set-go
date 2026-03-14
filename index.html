@@ -151,8 +151,10 @@
         transform: translateY(-50%);
         flex-direction: column;
         width: clamp(44px, 10vw, 58px);
-        padding: 6px 4px;
+        padding: 4px 2px;
         gap: 4px;
+        background: transparent;
+        border-radius: 0;
       }
       #timer-el { font-size: clamp(1.8rem,6vw,2.8rem); }
       #timer-clock { font-size: clamp(1.8rem,6vw,2.8rem); }
@@ -611,6 +613,7 @@ let lastRaf     = 0;
 let chars       = [];
 let itemState   = {};
 let inMamad     = new Set();
+let esterPipiDone = false;
 
 let mamadX = 0;
 
@@ -648,6 +651,7 @@ function startGame() {
   stopAll();
   inMamad.clear();
   slotIdx   = 0;
+  esterPipiDone = false;
   itemState = { ball: false, tuli: false, coffee: false, book: false };
   chars     = [];
   document.getElementById('close-door-btn').style.display = 'none';
@@ -816,6 +820,20 @@ function tryEnterMamad(c) {
     return;
   }
 
+  // סבתא אסתר — בפעם הראשונה יוצאת כי יש לה פיפי
+  if (c.id === 'ester' && !esterPipiDone) {
+    esterPipiDone = true;
+    showMsg('👵 אסתר: רגע רגע... יש לי פיפי! 🚽😅');
+    const s = snapFloor(mamadX - 120, c.y);
+    c.x = s.x; c.y = s.y;
+    c.el.style.left = c.x + 'px';
+    c.el.style.top  = c.y + 'px';
+    c.state = 'wander';
+    c.el.classList.remove('dragging');
+    applyDepth(c);
+    return;
+  }
+
   const W = window.innerWidth, H = window.innerHeight;
   const slot = MAMAD_SLOTS[Math.min(slotIdx++, MAMAD_SLOTS.length - 1)];
   const sx = slot[0] * W, sy = slot[1] * H;
@@ -847,15 +865,18 @@ function spawnItems() {
   const game = document.getElementById('screen-game');
   const W = window.innerWidth, H = window.innerHeight;
 
-  const POS = {
-    ball:   { xf: .14, yf: .72 },
-    tuli:   { xf: .07, yf: .46 },
-    coffee: { xf: .24, yf: .60 },
-    book:   { xf: .36, yf: .52 },
-  };
+  const ITEM_POS_POOL = [
+    { xf: .06, yf: .55 }, { xf: .14, yf: .62 }, { xf: .22, yf: .48 },
+    { xf: .30, yf: .57 }, { xf: .38, yf: .45 }, { xf: .10, yf: .42 },
+    { xf: .26, yf: .63 }, { xf: .18, yf: .52 }, { xf: .34, yf: .60 },
+  ];
+  // shuffle and pick one position per item
+  const posPool = ITEM_POS_POOL.slice().sort(() => Math.random() - .5);
+  const itemPos = {};
+  ITEMS.forEach((d, i) => { itemPos[d.id] = posPool[i % posPool.length]; });
 
   ITEMS.forEach(d => {
-    const { xf, yf } = POS[d.id];
+    const { xf, yf } = itemPos[d.id];
     const { top, bot } = floorY(xf);
     const yFrac = Math.max(top + .03, Math.min(yf, bot - .05));
 
